@@ -112,6 +112,58 @@ struct BallMoveArea
 		Vector vecDir(vecEndPos-vecBeginPos);
 		Vector vecOtherDir((Vector)other.vecEndPos-other.vecBeginPos);
 
+		bool bIsInsert = false;
+		do 
+		{
+			Vector vecTemp(vecBeginPos-other.vecBeginPos);
+			if (vecTemp.VectorMod() < fRadii + other.fRadii)
+			{
+				bIsInsert = true;
+				break;
+			}
+
+			vecTemp.mx = vecBeginPos.mx - other.vecEndPos.mx;
+			vecTemp.my = vecBeginPos.my - other.vecEndPos.my;
+			if(vecTemp.VectorMod() < fRadii + other.fRadii)
+			{
+				bIsInsert = true;
+				break;
+			}
+
+			// 第一个圆与Other三角形1
+			// 第一个圆与Other三角形2
+
+			// 三角形1 与 Other第一个圆
+			// 三角形1 与 Other三角形1
+			// 三角形1 与 Other三角形2
+			// 三角形1 与 Other第一个圆
+
+			// 三角形2 与 Other第一个圆
+			// 三角形2 与 Other三角形1
+			// 三角形2 与 Other三角形2
+			// 三角形2 与 Other第一个圆
+
+			vecTemp.mx = vecEndPos.mx - other.vecBeginPos.mx;
+			vecTemp.my = vecEndPos.my - other.vecBeginPos.my;
+			if(vecTemp.VectorMod() < fRadii + other.fRadii)
+			{
+				bIsInsert = true;
+				break;
+			}
+
+			vecTemp.mx = vecEndPos.mx - other.vecEndPos.mx;
+			vecTemp.my = vecEndPos.my - other.vecEndPos.my;
+			if(vecTemp.VectorMod() < fRadii + other.fRadii)
+			{
+				bIsInsert = true;
+				break;
+			}
+
+			// 第2个圆与Other三角形1
+			// 第2个圆与Other三角形2
+		} while (false);
+
+
 		// 检测两个圆是否相交 两个三角形
 		if(vecDir.VectorMod() > 0.001f)
 		{
