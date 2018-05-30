@@ -23,17 +23,17 @@ struct Linear
 };
 
 
-bool Insert(const Circle& left, const Circle& right)
+inline bool Insert(const Circle& left, const Circle& right)
 {
 	return true;
 }
 
-bool Insert(const Circle& left, const HalfCircle& right)
+inline bool Insert(const Circle& left, const HalfCircle& right)
 {
 	return true;
 }
 
-bool Insert(const Circle& left, const Linear& right)
+inline bool Insert(const Circle& left, const Linear& right)
 {
 	float x = 0, y = 0;
 	//(x  - left.vecCenter.mx) ^ 2 + (y - left.vecCenter.my) ^ 2 = left.fRadii ^ 2;
@@ -48,32 +48,32 @@ bool Insert(const Circle& left, const Linear& right)
 	return true;
 }
 
-bool Insert(const HalfCircle& left, const Circle& right)
+inline bool Insert(const HalfCircle& left, const Circle& right)
 {
 	return Insert(right, left);
 }
 
-bool Insert(const HalfCircle& left, const HalfCircle& right)
+inline bool Insert(const HalfCircle& left, const HalfCircle& right)
 {
 	return true;
 }
 
-bool Insert(const HalfCircle& left, const Linear& right)
+inline bool Insert(const HalfCircle& left, const Linear& right)
 {
 	return true;
 }
 
-bool Insert(const Linear& left, const Circle& right)
+inline bool Insert(const Linear& left, const Circle& right)
 {
 	return Insert(right, left);
 }
 
-bool Insert(const Linear& left, const HalfCircle& right)
+inline bool Insert(const Linear& left, const HalfCircle& right)
 {
 	return Insert(right, left);
 }
 
-bool Insert(const Linear& left, const Linear& right)
+inline bool Insert(const Linear& left, const Linear& right)
 {
 	float a11 = left.vecBeginPos.my - left.vecEndPos.my;
 	float a12 = -(left.vecBeginPos.mx - left.vecEndPos.mx);

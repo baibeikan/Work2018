@@ -30,7 +30,7 @@ void SrcBitmap::LoadBitmap()
 	HBITMAP SrcBitmap = NULL;
 	for (int i = 0; i < BALL_NUM; ++i)
 	{
-		sprintf(FileName,"Src\\%d.bmp",i);
+		sprintf_s(FileName,"Src\\%d.bmp",i);
 		hdc = CreateCompatibleDC(NULL);
 		SrcBitmap = HBITMAP(LoadImage(NULL,FileName,IMAGE_BITMAP,0,0,LR_LOADFROMFILE));
 		SelectObject(hdc,SrcBitmap);

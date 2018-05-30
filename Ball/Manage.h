@@ -7,7 +7,7 @@ public:
 	Manage(HDC pMainDc,RECT ClientRect);
 	~Manage(void);
 	void Init();
-	void Update();
+	void Update(float _deltaTime);
 	void Render(HDC pMainDc);
 private:
 	RECT	m_ClientRect;

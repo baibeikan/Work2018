@@ -47,26 +47,60 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	TimeInit();
 	KeyInit();
 
+	LARGE_INTEGER m_Frequency, m_Counter, tempCounter;
+
+	float fps = 1.0f / 72;
+	QueryPerformanceFrequency(&m_Frequency);
+	QueryPerformanceCounter(&m_Counter);
+	HANDLE m_hEvent = CreateEvent(NULL, FALSE, FALSE, "Event");
+
 	// 主消息循环:
 	ZeroMemory(&msg,sizeof(msg));
 	while (msg.message != WM_QUIT)
 	{
-		TimeUpdate();
-		KeyUpdate();
-		if (GetKeyState(VK_ESCAPE)&0x80)
+		QueryPerformanceCounter(&tempCounter);
+		float deltaTime = (float)(double(tempCounter.QuadPart - m_Counter.QuadPart)/m_Frequency.QuadPart);
+		if(deltaTime < fps)
 		{
-			SendMessage(hWnd,WM_CLOSE,0,0);
+			// 如果帧间差时间没有达到间隔时间
+			int waitTime = int((fps - deltaTime) * 1000);
+			// 等待的毫秒数
+			WaitForSingleObject(m_hEvent, waitTime);
+			continue;
 		}
-		if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+		else
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			// 记录当前的时间
+			m_Counter = tempCounter;
+			if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+
+			// 数据的更新和渲染
 		}
-		pMainDc = GetDC(hWnd);
-		Game.Update();
-		Game.Render(pMainDc);
-		ReleaseDC(hWnd,pMainDc);
 	}
+
+	CloseHandle(m_hEvent);
+	
+			TimeUpdate();
+			KeyUpdate();
+			if (GetKeyState(VK_ESCAPE)&0x80)
+			{
+				SendMessage(hWnd,WM_CLOSE,0,0);
+			}
+			if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+
+			pMainDc = GetDC(hWnd);
+			Game.Update(deltaTime);
+			Game.Render(pMainDc);
+			ReleaseDC(hWnd,pMainDc);
+
 
 	return (int) msg.wParam;
 }

@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include ".\BallManager.h"
 #define FLOATZERO 0.0f
-#define UMG (-9.8f)
+#define UMG (9.8f * 2)
 
 int CalculationTwoElementEquation(float A, float B, float C, float& x0, float& x1)
 {
@@ -39,7 +39,7 @@ bool BallCrash(BALL* pSrcBall, BALL* pDesBall)
 	if(pSrcBall == NULL || pDesBall == NULL)
 	{
 		char szLog[256] = {};
-		sprintf(szLog, "=====Error:BallCrash::pSrcBall Or pDesBall Is NULL=====\n");
+		sprintf_s(szLog, "=====Error:BallCrash::pSrcBall Or pDesBall Is NULL=====\n");
 		OutputDebugString(szLog);
 		return false;
 	}
@@ -52,7 +52,7 @@ bool BallCrash(BALL* pSrcBall, BALL* pDesBall)
 	if(DisSquare - DiaSquare > 0.5f || DiaSquare - DisSquare < -0.5f)
 	{
 		char szLog[256] = {};
-		sprintf(szLog, "=====Error:BallCrash::pSrcBall And pDesBall Dis=%f Is Lagger BillDia=%f=====\n", DisSquare, DiaSquare);
+		sprintf_s(szLog, "=====Error:BallCrash::pSrcBall And pDesBall Dis=%f Is Lagger BillDia=%f=====\n", DisSquare, DiaSquare);
 		OutputDebugString(szLog);
 		return false;
 	}
@@ -190,6 +190,9 @@ bool CheckCrashWall(const BALL& srcBall, const Vector& pos, const Vector& dir, c
 
 bool CrashWall(BALL* pSrcBall, const Vector& pos, const Vector& dir)
 {
+	if(pSrcBall->speed <= 0.0f)
+		return false;
+
 	float a, b, c;
 	a = dir.my;
 	b = -dir.mx;
@@ -221,7 +224,7 @@ BallManager::BallManager(map<int,HDC> SrcMap,HDC *pBackDc,int TableW,int TableH)
 	m_pBackDc = pBackDc;
 	m_Height = 0;
 	m_Width = 0;
-	ZeroMemory(m_Ball,sizeof(m_Ball));
+	memset(m_Ball, 0, sizeof(m_Ball));
 	m_SrcMap = SrcMap;
 	m_FrameLeft=BallRadii;
 	m_FrameTop =BallRadii;
@@ -239,6 +242,7 @@ BallManager::BallManager(map<int,HDC> SrcMap,HDC *pBackDc,int TableW,int TableH)
 
 	m_i = 0;
 	m_j = 0;
+
 }
 
 BallManager::~BallManager(void)
@@ -277,6 +281,11 @@ void BallManager::Init()
 	m_Ball[13].vPos(m_Ball[11].vPos.mx,m_Ball[11].vPos.my-2*D);
 	m_Ball[14].vPos(m_Ball[11].vPos.mx,m_Ball[11].vPos.my-3*D);
 	m_Ball[15].vPos(m_Ball[11].vPos.mx,m_Ball[11].vPos.my-4*D);
+
+	for(int i = 0; i < BALL_NUM; ++i)
+	{
+		m_Ball[i].bIsActive = true;
+	}
 }
 
 void BallManager::Update( float deltaTime )
@@ -295,12 +304,22 @@ void BallManager::Update( float deltaTime )
 			ballMoveArea.fRadii = BallRadii;
 			ballMoveArea.vecBeginPos = srcBall.vPos;
 			ballMoveArea.vecEndPos = srcBall.vPos + srcBall.dir * (srcBall.speed + 0.5f * UMG * moveTime) * moveTime;
+
+			srcBall.vPos = ballMoveArea.vecEndPos;
+
+			srcBall.speed -= UMG*moveTime;
 		}
 	}
 
 	for (int i = 0; i < BALL_NUM; ++i)
 	{
-
+		BALL& srcBall = m_Ball[i];
+		if(srcBall.bIsActive && srcBall.speed > 0.001f)
+		{
+			if(CrashWall(&srcBall, srcBall.vPos, srcBall.dir))
+			{
+			}
+		}
 	}
 
 	//std::vector<int> setIndex;
@@ -389,10 +408,10 @@ void BallManager::Render(int x,int y)
 	int static RenderY;
 	FillRect(m_MapDc,&m_MapRect,m_MapBrush);
 
-	for (int i = 0;i < 16; ++i)
+	for (int i = 0;i < BALL_NUM; ++i)
 	{
-		RenderX = int(m_Ball[i].vPos.mx - BallRadii + x);
-		RenderY = int(m_Ball[i].vPos.my - BallRadii + y);
+		RenderX = int(m_Ball[i].vPos.mx - BallRadii + x + 0.5f);
+		RenderY = int(m_Ball[i].vPos.my - BallRadii + y + 0.5f);
 		TransparentBlt(*m_pBackDc,RenderX,RenderY,BallDia,BallDia,m_SrcMap[i],0,0,50,50,RGB(125,61,99));
 	}
 }
@@ -492,7 +511,7 @@ void BallManager::_CheckCrash( float tickTime )
 		else
 		{
 			char szLog[256] = {};
-			sprintf(szLog, "=====_CheckCrash::nType=%d, crashTime=%f,time=%f=====\n",crashType,  fMinCrashTime, tickTime);
+			sprintf_s(szLog, "=====_CheckCrash::nType=%d, crashTime=%f,time=%f=====\n",crashType,  fMinCrashTime, tickTime);
 			OutputDebugString(szLog);
 
 			if(fMinCrashTime > tickTime)
@@ -568,6 +587,7 @@ void BallManager::SetOriginGlobePos( Vector CursorPos )
 
 void BallManager::SetOriginGlobeSpend( float Speed )
 {
+	Speed = 2.0f;
 	m_Ball[0].speed = Speed;
 }
 
@@ -646,6 +666,7 @@ void BallManager::SetCursorPos( Vector const&CursorPos )
 	if(speed <= 0.00001f)
 		return;
 
+	speed = 100.0f;
 	m_Ball[0].dir = dir.VectorNormal();
 	m_Ball[0].speed = speed * 2.0f;
 }

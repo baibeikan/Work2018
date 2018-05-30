@@ -38,7 +38,7 @@ void Manage::Init()
 	//m_pBall2->Load("1.bmp",50,50);
 }
 
-void Manage::Update()
+void Manage::Update(float _deltaTime)
 {
 	static bool IsDown = false;
 	//IsDown = false;
@@ -68,7 +68,7 @@ void Manage::Update()
 			}
 		}
 	}
-	m_pBall1->Update(m_FrameTime);
+	m_pBall1->Update(_deltaTime);
 }
 
 void Manage::Render( HDC pMainDc )
